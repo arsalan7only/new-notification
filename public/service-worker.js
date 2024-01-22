@@ -43,3 +43,39 @@ self.addEventListener("fetch", function (event) {
     );
   }
 });
+
+self.addEventListener("push", (event) => {
+  const notification = event.data.text();
+  const convertParse = JSON.parse(notification);
+  const options = {
+    body: convertParse.body,
+    icon: convertParse.icon,
+    vibrate: [100, 50, 100],
+    data: { url: convertParse.url },
+    title: convertParse.title,
+  };
+
+  if (Object.keys(convertParse).length > 0) {
+    event.waitUntil(
+      self.registration.showNotification(
+        convertParse.title,
+        convertParse.notification
+      )
+    );
+  }
+});
+
+self.addEventListener("push", (event) => {
+  // Extract the unread count from the push message data.
+  const message = event.data.json();
+  const unreadCount = message.unreadCount;
+
+  // Set or clear the badge.
+  if (navigator.setAppBadge) {
+    if (unreadCount && unreadCount > 0) {
+      navigator.setAppBadge(unreadCount);
+    } else {
+      navigator.clearAppBadge();
+    }
+  }
+});
