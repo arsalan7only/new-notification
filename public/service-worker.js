@@ -21,16 +21,14 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("install", function (event) {
   if (doCache) {
     event.waitUntil(
-      caches.open(CACHE_NAME).then(function (cache) {
-        fetch("manifest.json")
-          .then((response) => {
-            response.json();
-          })
-          .then((assets) => {
-            const urlsToCache = ["/", assets["main.js"]];
-            cache.addAll(urlsToCache);
-            console.log("cached");
-          });
+      caches.open(CACHE_NAME).then((cache) => {
+        cache.addAll([
+          "/",
+          "/index.html",
+          "/manifest.json",
+          "/static/js/bundle.js",
+          // Add other assets as needed
+        ]);
       })
     );
   }
