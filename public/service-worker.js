@@ -1,53 +1,46 @@
-const PRECACHE = "precache-v1";
-const RUNTIME = "runtime";
+var doCache = true; // Set this to true for production
 
-const PRECACHE_URLS = [
-  "/index.html",
-  "/js/main.js",
-  "https://fonts.googleapis.com/css?family=Roboto:300400&display=swap",
-  "/manifest.json",
-];
-
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(PRECACHE)
-      .then((cache) => {
-        return cache.addAll(PRECACHE_URLS);
-      })
-      .then(() => self.skipWaiting())
-  );
-});
+var CACHE_NAME = "my-pwa-cache-v1";
 
 self.addEventListener("activate", (event) => {
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then((names) => {
-      for (let name of names) {
-        caches.delete(name);
-      }
-    })
+    caches.keys().then((keyList) =>
+      Promise.all(
+        keyList.map((key) => {
+          if (!cacheWhitelist.includes(key)) {
+            console.log("Deleting cache: " + key);
+            return caches.delete(key);
+          }
+        })
+      )
+    )
   );
 });
 
-// The `push` event is triggered by a call to `registration.pushManager.
-// subscribe()` by the user's script.
-self.addEventListener("fetch", (event) => {
-  if (event.request.url.startWith(self.location.origin)) {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        return caches.open(RUNTIME).then((cache) => {
-          return fetch(event.request).then((response) => {
-            // Put a copy of the response in the runtime cache.
-            // Return the original response since that’s what your web app
-            // needs to show the page.
-            return cache.put(event.request, response.clone()).then(() => {
-              return response;
-            });
+self.addEventListener("install", function (event) {
+  if (doCache) {
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(function (cache) {
+        fetch("manifest.json")
+          .then((response) => {
+            response.json();
+          })
+          .then((assets) => {
+            const urlsToCache = ["/", assets["main.js"]];
+            cache.addAll(urlsToCache);
+            console.log("cached");
           });
-        });
+      })
+    );
+  }
+});
+
+self.addEventListener("fetch", function (event) {
+  if (doCache) {
+    event.respondWith(
+      caches.match(event.request).then(function (response) {
+        return response || fetch(event.request);
       })
     );
   }
