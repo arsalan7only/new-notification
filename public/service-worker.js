@@ -1,44 +1,59 @@
-var doCache = true; // Set this to true for production
+const PRECACHE = "precache-v1";
+const RUNTIME = "runtime";
 
-var CACHE_NAME = "my-pwa-cache-v1";
+//Resources always being precached on load.
+const PRECACHE_URLS = [
+  "/index.html",
+  "/",
+  "./criket.jpg",
+  "/barcode192.png",
+  "/barcode256.png",
+  "/barcode384.png",
+  "/barcode512.png",
+  "fulcrumdigital.jpg",
+];
 
-self.addEventListener("activate", (event) => {
-  const cacheWhitelist = [CACHE_NAME];
+// Using install handler for precaching.
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.keys().then((keyList) =>
-      Promise.all(
-        keyList.map((key) => {
-          if (!cacheWhitelist.includes(key)) {
-            console.log("Deleting cache: " + key);
-            return caches.delete(key);
-          }
-        })
-      )
-    )
+    caches
+      .open(PRECACHE)
+      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then(self.skipWaiting())
   );
 });
 
-self.addEventListener("install", function (event) {
-  if (doCache) {
-    event.waitUntil(
-      caches.open(CACHE_NAME).then((cache) => {
-        cache.addAll([
-          "/",
-          "/index.html",
-          "/manifest.json",
-          "/static/js/bundle.js",
-          // Add other assets as needed
-        ]);
-      })
-    );
-  }
+// Cleaning old cache using activate handler.
+self.addEventListener("activate", (event) => {
+  // const currentCaches = [PRECACHE, RUNTIME];
+  event.waitUntil(
+    caches.keys().then(function (names) {
+      for (let name of names) {
+        console.log("activate");
+        caches.delete(name);
+      }
+    })
+  );
 });
 
-self.addEventListener("fetch", function (event) {
-  if (doCache) {
+// Populating runtime cache with response if no network is found.
+self.addEventListener("fetch", (event) => {
+  // Skipping any made origin requests
+  if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
-      caches.match(event.request).then(function (response) {
-        return response || fetch(event.request);
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        return caches.open(RUNTIME).then((cache) => {
+          return fetch(event.request).then((response) => {
+            // Put a copy of the response in the runtime cache.
+            return cache.put(event.request, response.clone()).then(() => {
+              return response;
+            });
+          });
+        });
       })
     );
   }
@@ -57,10 +72,7 @@ self.addEventListener("push", (event) => {
 
   if (Object.keys(convertParse).length > 0) {
     event.waitUntil(
-      self.registration.showNotification(
-        convertParse.title,
-        convertParse.notification
-      )
+      self.registration.showNotification(convertParse.title, options)
     );
   }
 });
