@@ -53,6 +53,7 @@ const App = () => {
   }, []);
 
   const subscribeUser = async () => {
+    console.log("i am call");
     try {
       const registration = await navigator.serviceWorker.ready;
       const convertedVapidKey = urlBase64ToUint8Array(
