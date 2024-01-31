@@ -47,41 +47,16 @@ input:focus {
   border-color: #ff9900; /* Warna input saat focus */
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@100;200;300;400;500;600;700;800&display=swap");
-
-body {
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
-}
-
-.submit-btn {
-  font-family: "Anek Malayalam", sans-serif;
-  background: #f5b40d;
+button {
+  background-color: #ff9900; /* Warna button */
+  color: #fff;
+  padding: 10px;
   border: none;
-  outline: none;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 14px;
-  color: #ffffff;
-  min-width: 170px;
-  min-height: 36px;
+  border-radius: 8px; /* Border radius button */
   cursor: pointer;
-  outline: none;
+  transition: background-color 0.3s ease-in-out;
 }
 
-.submit-btn:disabled {
-  background: #e7e8e9;
-  color: #9fa3a9;
-  cursor: not-allowed;
-}
-
-.spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation-name: spin;
-  animation-duration: 500ms;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
+button:hover {
+  background-color: #ff6600; /* Warna button saat hover */
 }

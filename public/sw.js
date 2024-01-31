@@ -1,31 +1,54 @@
-let cacheData = "appV1";
-this.addEventListener("install", (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(cacheData).then((cache) => {
+    caches.open("appv1").then((cache) => {
       cache.addAll([
-        "/static/js/main.chunk.js",
-        "/static/js/0.chunk.js",
-        "/static/js/bundle.js",
-        "/static/css/main.chunk.css",
-        "/bootstrap.min.css",
-        "/index.html",
         "/",
+        "/index.html",
+        "/manifest.json",
+        "/static/js/bundle.js",
+        // Add other assets as needed
       ]);
     })
   );
 });
-this.addEventListener("fetch", (event) => {
-  // console.warn("url",event.request.url)
 
-  if (!navigator.onLine) {
-    event.respondWith(
-      caches.match(event.request).then((resp) => {
-        if (resp) {
-          return resp;
-        }
-        let requestUrl = event.request.clone();
-        fetch(requestUrl);
-      })
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
+
+self.addEventListener("push", (event) => {
+  const notification = event.data.text();
+  const convertParse = JSON.parse(notification);
+  const options = {
+    body: convertParse.body,
+    icon: convertParse.icon,
+    vibrate: [100, 50, 100],
+    data: { url: convertParse.url },
+    title: convertParse.title,
+  };
+
+  if (Object.keys(convertParse).length > 0) {
+    event.waitUntil(
+      self.registration.showNotification(convertParse.title, options)
     );
+  }
+});
+
+self.addEventListener("push", (event) => {
+  // Extract the unread count from the push message data.
+  const message = event.data.json();
+  const unreadCount = message.unreadCount;
+
+  // Set or clear the badge.
+  if (navigator.setAppBadge) {
+    if (unreadCount && unreadCount > 0) {
+      navigator.setAppBadge(unreadCount);
+    } else {
+      navigator.clearAppBadge();
+    }
   }
 });
