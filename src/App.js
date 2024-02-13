@@ -1,122 +1,54 @@
-import React, { useEffect, useState } from "react";
+import logo from "./logo.svg";
 import "./App.css";
-const App = () => {
-  const [username, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+import Notification from "./components/Notification";
+import { requestForToken } from "./firebase";
+import { useState } from "react";
 
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.ready
-        .then((registration) => {
-          if (registration.pushManager) {
-            return registration.pushManager.getSubscription();
-          }
-          throw new Error("PushManager not available");
-        })
-        .then((subscription) => {
-          if (subscription === null) {
-            subscribeUser();
-          }
-        })
-        .catch((error) => {
-          console.error("Error checking pushManager:", error);
-        });
-    }
-  }, []);
-
-  const subscribeUser = async () => {
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const convertedVapidKey = urlBase64ToUint8Array(
-        "BKdeaCCBxk3lnIJGRRHlhxKcF1kDyFiWeh0YX0Pfr6rXaPTEDWmL-E-h6vmbIXJntVnEhBNx6Y9QmBcbP5MyWAo"
-      );
-
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: convertedVapidKey,
-      });
-      console.log("User is subscribed:", subscription);
-      return subscription;
-    } catch (error) {
-      console.error("Failed to subscribe the user:", error);
-    }
-  };
-
-  const urlBase64ToUint8Array = (base64String) => {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-
-    return outputArray;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let test = await subscribeUser();
-    console.log("test", test);
-    let payload = {
-      username,
-      password,
-      token: test,
+function App() {
+  const [name, setName] = useState("");
+  const handleClick = async () => {
+    const token = await requestForToken();
+    const payload = {
+      name: name,
+      token: token,
     };
-    fetch("https://node-mongo-api-g1v4.onrender.com/api/v1/login", {
+    // fetch("http://localhost:3006/api/v1/addtoken", {
+    fetch("https://node-mongo-api-g1v4.onrender.com/api/v1/addtoken", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     }).then((res) => {
-      if (res.status == 200 && res.data !== "inviled credential") {
-        setIsLoggedIn(true);
-      }
-      console.log("test", res);
+      console.log(res);
     });
   };
 
   return (
     <div className="App">
-      {!isLoggedIn ? (
-        <div class="container">
-          <div class="card">
-            <h2>Login form</h2>
-            <form>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Username"
-                onChange={(e) => setUserName(e.target.value)}
-                required
-              />
-              <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Password"
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button type="submit" onClick={(e) => handleSubmit(e)}>
-                Login
-              </button>
-            </form>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <h3>Welcome</h3>
-        </div>
-      )}
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header>
+      <input
+        onChange={(e) => setName(e.target.value)}
+        type="text"
+        placeholder="name"
+      />
+      <button onClick={handleClick}>Call Me </button>
+      <Notification />
     </div>
   );
-};
+}
 
 export default App;
