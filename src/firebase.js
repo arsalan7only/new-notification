@@ -25,6 +25,7 @@ export const requestForToken = () => {
       if (currentToken) {
         console.log("current token for client: ", currentToken);
         // Perform any other neccessary action with the token
+        return currentToken;
       } else {
         // Show permission request UI
         console.log(
