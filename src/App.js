@@ -3,7 +3,7 @@ import "./App.css";
 import Notification from "./components/Notification";
 import { requestForToken } from "./firebase";
 import { useState } from "react";
-
+import "bootstrap/dist/css/bootstrap.min.css";
 function App() {
   const [name, setName] = useState("");
   const handleClick = async () => {
@@ -26,26 +26,21 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-      <input
-        onChange={(e) => setName(e.target.value)}
-        type="text"
-        placeholder="name"
-      />
-      <button onClick={handleClick}>Call Me </button>
+      <div class="form-group">
+        <label for="exampleInputEmail1">Name</label>
+        <input
+          type="text"
+          class="form-control"
+          id="exampleInputEmail1"
+          aria-describedby="emailHelp"
+          placeholder="Enter Name"
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary" onClick={handleClick}>
+        Submit
+      </button>
       <Notification />
     </div>
   );
