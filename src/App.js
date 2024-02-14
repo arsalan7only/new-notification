@@ -6,6 +6,7 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 function App() {
   const [name, setName] = useState("");
+  const [support, setSupport] = useState("");
   const handleClick = async () => {
     const token = await requestForToken();
     const payload = {
@@ -23,9 +24,30 @@ function App() {
       console.log(res);
     });
   };
-
+  useEffect(() => {
+    // Check if the browser supports the Notification API
+    if ("Notification" in window) {
+      // Request permission if it hasn't been granted yet
+      if (
+        Notification.permission !== "granted" &&
+        Notification.permission !== "denied"
+      ) {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            console.log("Permission for notifications granted!");
+            setSupport("Permission for notifications granted!");
+          } else {
+            setSupport("Permission for notifications denied.");
+          }
+        });
+      }
+    } else {
+      setSupport("Browser does not support notifications.");
+    }
+  }, []);
   return (
     <div className="App">
+      <h2>{"support" + support}</h2>
       <div class="form-group">
         <label for="exampleInputEmail1">Name</label>
         <input
