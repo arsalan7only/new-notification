@@ -2,7 +2,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import Notification from "./components/Notification";
 import { requestForToken } from "./firebase";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 function App() {
   const [name, setName] = useState("");
