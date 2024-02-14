@@ -25,24 +25,12 @@ function App() {
     });
   };
   useEffect(() => {
-    // Check if the browser supports the Notification API
     if ("Notification" in window) {
-      // Request permission if it hasn't been granted yet
-      if (
-        Notification.permission !== "granted" &&
-        Notification.permission !== "denied"
-      ) {
-        Notification.requestPermission().then((permission) => {
-          if (permission === "granted") {
-            console.log("Permission for notifications granted!");
-            setSupport("Permission for notifications granted!");
-          } else {
-            setSupport("Permission for notifications denied.");
-          }
-        });
-      }
+      // API supported
+      setSupport("support");
     } else {
-      setSupport("Browser does not support notifications.");
+      // API not supported
+      setSupport("not supported");
     }
   }, []);
   return (
